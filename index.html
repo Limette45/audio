@@ -294,7 +294,7 @@ textarea {
     </div>
 
     <div class="controls">
-        <button id="readAllButton">🔊Read All</button>
+        <button id="readAllButton">Read All</button>
         <button id="pauseButton">⏸ Pause</button>
         <button id="resumeButton">▶ Resume</button>
         <button id="stopButton">⏹ Stop</button>
@@ -449,6 +449,25 @@ function updateSentences() {
     saveData();
 }
 
+function scrollToSpeakingSentence() {
+    if (currentSpeakingIndex < 0) {
+        return;
+    }
+
+    const item = sentencesContainer.querySelector(
+        `[data-index="${currentSpeakingIndex}"]`
+    );
+
+    if (!item) {
+        return;
+    }
+
+    item.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
 function renderSentences() {
     sentencesContainer.innerHTML = "";
 
@@ -485,6 +504,10 @@ function renderSentences() {
 
         sentencesContainer.appendChild(item);
     });
+
+    if (currentSpeakingIndex >= 0) {
+        requestAnimationFrame(scrollToSpeakingSentence);
+    }
 }
 
 function loadVoices() {
