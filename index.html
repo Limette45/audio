@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Text-to-Speech Study Tool</title>
+<title>Voice Study Tool</title>
 
 <style>
 * {
@@ -24,156 +24,153 @@ body {
 }
 
 h1 {
-    margin-bottom: 25px;
+    margin: 0 0 25px;
+    text-align: center;
 }
 
 .mode-buttons {
     display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-button {
+.mode-buttons button {
+    flex: 1;
+}
+
+button,
+select {
+    padding: 10px 14px;
     border: 1px solid #ccc;
-    background: white;
-    padding: 9px 14px;
     border-radius: 6px;
+    background: white;
+    font-size: 15px;
     cursor: pointer;
-    font-size: 14px;
 }
 
 button:hover {
-    background: #f0f0f0;
+    background: #eee;
 }
 
-button.active {
-    background: #222;
+.mode-buttons button.active {
+    background: #333;
     color: white;
-    border-color: #222;
 }
 
 textarea {
     width: 100%;
     min-height: 220px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
     resize: vertical;
-    padding: 14px;
     font-size: 16px;
     line-height: 1.6;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: white;
-}
-
-.settings {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin: 15px 0;
-    align-items: center;
-}
-
-.settings label {
-    font-size: 14px;
-}
-
-select,
-input[type="range"] {
-    margin-left: 5px;
+    font-family: Arial, sans-serif;
 }
 
 .controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin: 15px 0 25px;
+    gap: 10px;
+    margin: 15px 0;
 }
 
-.controls button {
-    font-weight: 500;
+.controls select {
+    min-width: 180px;
 }
 
-.sentence {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 14px;
-    margin-bottom: 10px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
+.clear-button {
+    margin-left: auto;
+    background: #fff;
+    border-color: #c44;
+    color: #b22;
 }
 
-.sentence-number {
-    min-width: 28px;
-    color: #777;
-    font-size: 14px;
-}
-
-.sentence-text {
-    flex: 1;
-    line-height: 1.6;
-    word-break: break-word;
-}
-
-.sentence button {
-    flex-shrink: 0;
-}
-
-.sentence.speaking {
-    border-color: #333;
-    background: #eeeeee;
+.clear-button:hover {
+    background: #fee;
 }
 
 .status {
-    margin-bottom: 15px;
+    min-height: 24px;
+    margin: 10px 0;
     color: #666;
     font-size: 14px;
 }
 
-.empty {
-    color: #777;
-    padding: 20px 0;
+.sentences {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.hidden {
-    display: none;
+.sentence {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.sentence.speaking {
+    background: #eaf2ff;
+    border-color: #4285f4;
+}
+
+.sentence-text {
+    flex: 1;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.listen-button {
+    flex-shrink: 0;
+}
+
+.empty {
+    padding: 30px;
+    text-align: center;
+    color: #888;
+    background: white;
+    border-radius: 8px;
 }
 
 @media (max-width: 600px) {
+    body {
+        padding: 20px 10px;
+    }
+
+    .controls {
+        flex-direction: column;
+    }
+
+    .controls select,
+    .controls button {
+        width: 100%;
+    }
+
+    .clear-button {
+        margin-left: 0;
+    }
+
     .sentence {
-        flex-wrap: wrap;
-    }
-
-    .sentence button {
-        margin-left: 40px;
-    }
-
-    .settings {
-        display: block;
-    }
-
-    .settings label {
-        display: block;
-        margin-bottom: 10px;
+        align-items: flex-start;
     }
 }
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
-    <h1>Text-to-Speech Study Tool</h1>
+    <h1>Voice Study Tool</h1>
 
     <div class="mode-buttons">
-        <button id="normalModeButton" class="active">
-            Normal Mode
-        </button>
-
-        <button id="lyricsModeButton">
-            Lyrics Mode
-        </button>
+        <button id="normalModeButton" class="active">Normal Mode</button>
+        <button id="lyricsModeButton">Lyrics Mode</button>
     </div>
 
     <textarea
@@ -181,125 +178,430 @@ input[type="range"] {
         placeholder="Enter your text here..."
     ></textarea>
 
-    <div class="settings">
+    <div class="controls">
+        <select id="languageSelect">
+            <option value="de-DE">German</option>
+            <option value="es-US">Spanish (Latin America)</option>
+            <option value="es-ES">Spanish (Spain)</option>
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="fr-FR">French</option>
+            <option value="it-IT">Italian</option>
+            <option value="pt-BR">Portuguese (Brazil)</option>
+        </select>
 
-        <label>
-            Language:
-            <select id="languageSelect">
-                <option value="de-DE">German</option>
-                <option value="es-US">Spanish (Latin America)</option>
-                <option value="es-ES">Spanish (Spain)</option>
-                <option value="en-US">English (US)</option>
-                <option value="en-GB">English (UK)</option>
-                <option value="fr-FR">French</option>
-                <option value="it-IT">Italian</option>
-                <option value="pt-BR">Portuguese (Brazil)</option>
-            </select>
-        </label>
+        <select id="voiceSelect">
+            <option value="">Default voice</option>
+        </select>
 
-        <label>
-            Voice:
-            <select id="voiceSelect">
-                <option value="">Default</option>
-            </select>
-        </label>
-
-        <label>
-            Speed:
-            <select id="rateSelect">
-                <option value="0.5">0.5x</option>
-                <option value="0.75">0.75x</option>
-                <option value="1" selected>1.0x</option>
-                <option value="1.25">1.25x</option>
-                <option value="1.5">1.5x</option>
-                <option value="2">2.0x</option>
-            </select>
-        </label>
-
+        <select id="speedSelect">
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2x</option>
+        </select>
     </div>
 
     <div class="controls">
-
-        <button id="readAllButton">
-            ▶ Read All
-        </button>
-
-        <button id="pauseButton">
-            ⏸ Pause
-        </button>
-
-        <button id="resumeButton">
-            ▶ Resume
-        </button>
-
-        <button id="stopButton">
-            ⏹ Stop
-        </button>
-
+        <button id="readAllButton">Read All</button>
+        <button id="pauseButton">Pause</button>
+        <button id="resumeButton">Resume</button>
+        <button id="stopButton">Stop</button>
+        <button id="clearButton" class="clear-button">Clear Sentences</button>
     </div>
 
-    <div id="status" class="status">
-        0 sentences
-    </div>
+    <div id="status" class="status"></div>
 
-    <div id="sentenceList"></div>
+    <div id="sentences" class="sentences">
+        <div class="empty">No sentences yet.</div>
+    </div>
 
 </div>
 
-
 <script>
-
-const textInput = document.getElementById("textInput");
-
-const normalModeButton =
-    document.getElementById("normalModeButton");
-
-const lyricsModeButton =
-    document.getElementById("lyricsModeButton");
-
-const languageSelect =
-    document.getElementById("languageSelect");
-
-const voiceSelect =
-    document.getElementById("voiceSelect");
-
-const rateSelect =
-    document.getElementById("rateSelect");
-
-const readAllButton =
-    document.getElementById("readAllButton");
-
-const pauseButton =
-    document.getElementById("pauseButton");
-
-const resumeButton =
-    document.getElementById("resumeButton");
-
-const stopButton =
-    document.getElementById("stopButton");
-
-const sentenceList =
-    document.getElementById("sentenceList");
-
-const status =
-    document.getElementById("status");
-
-
-let mode = "normal";
-let sentences = [];
-let voices = [];
-
-let speakingIndex = -1;
-let isReadingAll = false;
-
 const STORAGE_KEY = "ttsStudyToolData";
 
+const textInput = document.getElementById("textInput");
+const languageSelect = document.getElementById("languageSelect");
+const voiceSelect = document.getElementById("voiceSelect");
+const speedSelect = document.getElementById("speedSelect");
 
-/* =========================
-   Mode
-========================= */
+const normalModeButton = document.getElementById("normalModeButton");
+const lyricsModeButton = document.getElementById("lyricsModeButton");
+
+const readAllButton = document.getElementById("readAllButton");
+const pauseButton = document.getElementById("pauseButton");
+const resumeButton = document.getElementById("resumeButton");
+const stopButton = document.getElementById("stopButton");
+const clearButton = document.getElementById("clearButton");
+
+const status = document.getElementById("status");
+const sentencesContainer = document.getElementById("sentences");
+
+let mode = "normal";
+let voices = [];
+let sentences = [];
+let currentSpeakingIndex = -1;
+let readingAll = false;
+let readAllIndex = 0;
+
+function saveData() {
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+            text: textInput.value,
+            language: languageSelect.value,
+            speed: speedSelect.value,
+            mode: mode
+        })
+    );
+}
+
+function loadData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) {
+        updateSentences();
+        return;
+    }
+
+    try {
+        const data = JSON.parse(saved);
+
+        textInput.value = data.text || "";
+
+        if (data.language) {
+            languageSelect.value = data.language;
+        }
+
+        if (data.speed) {
+            speedSelect.value = data.speed;
+        }
+
+        if (data.mode === "lyrics") {
+            mode = "lyrics";
+            normalModeButton.classList.remove("active");
+            lyricsModeButton.classList.add("active");
+        }
+
+        updateSentences();
+    } catch {
+        updateSentences();
+    }
+}
+
+function splitNormalText(text) {
+    const normalized = text
+        .replace(/\r?\n/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (!normalized) {
+        return [];
+    }
+
+    const raw = normalized
+        .split(/(?<=[.!?])\s+/)
+        .map(sentence => sentence.trim())
+        .filter(Boolean);
+
+    const result = [];
+
+    for (const sentence of raw) {
+        const wordCount = sentence
+            .split(/\s+/)
+            .filter(Boolean)
+            .length;
+
+        if (wordCount < 3 && result.length > 0) {
+            result[result.length - 1] += " " + sentence;
+        } else {
+            result.push(sentence);
+        }
+    }
+
+    if (
+        result.length > 1 &&
+        result[0].split(/\s+/).filter(Boolean).length < 3
+    ) {
+        result[1] = result[0] + " " + result[1];
+        result.shift();
+    }
+
+    return result;
+}
+
+function splitLyricsText(text) {
+    return text
+        .split(/\r?\n/)
+        .map(line => line.replace(/\([^)]*\)/g, "").trim())
+        .map(line => line.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+}
+
+function updateSentences() {
+    speechSynthesis.cancel();
+
+    currentSpeakingIndex = -1;
+    readingAll = false;
+    readAllIndex = 0;
+
+    if (mode === "normal") {
+        sentences = splitNormalText(textInput.value);
+    } else {
+        sentences = splitLyricsText(textInput.value);
+    }
+
+    renderSentences();
+    saveData();
+}
+
+function renderSentences() {
+    sentencesContainer.innerHTML = "";
+
+    if (sentences.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "No sentences yet.";
+        sentencesContainer.appendChild(empty);
+        return;
+    }
+
+    sentences.forEach((sentence, index) => {
+        const item = document.createElement("div");
+        item.className = "sentence";
+        item.dataset.index = index;
+
+        if (index === currentSpeakingIndex) {
+            item.classList.add("speaking");
+        }
+
+        const text = document.createElement("div");
+        text.className = "sentence-text";
+        text.textContent = sentence;
+
+        const button = document.createElement("button");
+        button.className = "listen-button";
+        button.textContent = "Listen";
+        button.addEventListener("click", () => {
+            speakSentence(index);
+        });
+
+        item.appendChild(text);
+        item.appendChild(button);
+
+        sentencesContainer.appendChild(item);
+    });
+}
+
+function loadVoices() {
+    voices = speechSynthesis.getVoices();
+
+    const selectedLanguage = languageSelect.value;
+    const previousVoice = voiceSelect.value;
+
+    voiceSelect.innerHTML = "";
+
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Default voice";
+    voiceSelect.appendChild(defaultOption);
+
+    const matchingVoices = voices
+        .filter(voice => voice.lang.toLowerCase().startsWith(
+            selectedLanguage.toLowerCase().split("-")[0]
+        ))
+        .sort((a, b) => {
+            if (selectedLanguage === "es-US") {
+                const aPreferred =
+                    /mexico|latin|latino|es-us/i.test(a.name);
+                const bPreferred =
+                    /mexico|latin|latino|es-us/i.test(b.name);
+
+                if (aPreferred && !bPreferred) return -1;
+                if (!aPreferred && bPreferred) return 1;
+            }
+
+            return a.name.localeCompare(b.name);
+        });
+
+    matchingVoices.forEach(voice => {
+        const option = document.createElement("option");
+        option.value = voices.indexOf(voice);
+        option.textContent = `${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(option);
+    });
+
+    if (
+        previousVoice &&
+        [...voiceSelect.options].some(option => option.value === previousVoice)
+    ) {
+        voiceSelect.value = previousVoice;
+    }
+}
+
+function getSelectedVoice() {
+    const index = voiceSelect.value;
+
+    if (index === "") {
+        return null;
+    }
+
+    return voices[Number(index)] || null;
+}
+
+function speakSentence(index) {
+    if (!sentences[index]) {
+        return;
+    }
+
+    readingAll = false;
+    speechSynthesis.cancel();
+
+    currentSpeakingIndex = index;
+    renderSentences();
+
+    const utterance = new SpeechSynthesisUtterance(sentences[index]);
+
+    utterance.lang = languageSelect.value;
+    utterance.rate = Number(speedSelect.value);
+
+    const voice = getSelectedVoice();
+
+    if (voice) {
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+    }
+
+    utterance.onend = () => {
+        if (!readingAll) {
+            currentSpeakingIndex = -1;
+            renderSentences();
+        }
+    };
+
+    utterance.onerror = () => {
+        if (!readingAll) {
+            currentSpeakingIndex = -1;
+            renderSentences();
+        }
+    };
+
+    speechSynthesis.speak(utterance);
+}
+
+function readNext() {
+    if (!readingAll || readAllIndex >= sentences.length) {
+        readingAll = false;
+        currentSpeakingIndex = -1;
+        renderSentences();
+        status.textContent = "";
+        return;
+    }
+
+    const index = readAllIndex;
+
+    currentSpeakingIndex = index;
+    renderSentences();
+
+    const utterance = new SpeechSynthesisUtterance(sentences[index]);
+
+    utterance.lang = languageSelect.value;
+    utterance.rate = Number(speedSelect.value);
+
+    const voice = getSelectedVoice();
+
+    if (voice) {
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+    }
+
+    utterance.onend = () => {
+        if (!readingAll) {
+            return;
+        }
+
+        readAllIndex++;
+        readNext();
+    };
+
+    utterance.onerror = () => {
+        if (!readingAll) {
+            return;
+        }
+
+        readAllIndex++;
+        readNext();
+    };
+
+    speechSynthesis.speak(utterance);
+}
+
+function readAll() {
+    if (sentences.length === 0) {
+        return;
+    }
+
+    speechSynthesis.cancel();
+
+    readingAll = true;
+    readAllIndex = 0;
+
+    status.textContent = "Reading all sentences...";
+    readNext();
+}
+
+function pauseReading() {
+    if (speechSynthesis.speaking) {
+        speechSynthesis.pause();
+        status.textContent = "Paused";
+    }
+}
+
+function resumeReading() {
+    if (speechSynthesis.paused) {
+        speechSynthesis.resume();
+        status.textContent = readingAll
+            ? "Reading all sentences..."
+            : "Reading";
+    }
+}
+
+function stopReading() {
+    readingAll = false;
+    speechSynthesis.cancel();
+
+    currentSpeakingIndex = -1;
+    renderSentences();
+
+    status.textContent = "Stopped";
+}
+
+function clearSentences() {
+    speechSynthesis.cancel();
+
+    readingAll = false;
+    readAllIndex = 0;
+    currentSpeakingIndex = -1;
+
+    textInput.value = "";
+    sentences = [];
+
+    localStorage.removeItem(STORAGE_KEY);
+
+    renderSentences();
+
+    status.textContent = "Cleared";
+    textInput.focus();
+}
 
 normalModeButton.addEventListener("click", () => {
+    if (mode === "normal") {
+        return;
+    }
 
     mode = "normal";
 
@@ -307,766 +609,46 @@ normalModeButton.addEventListener("click", () => {
     lyricsModeButton.classList.remove("active");
 
     updateSentences();
-
 });
 
-
 lyricsModeButton.addEventListener("click", () => {
+    if (mode === "lyrics") {
+        return;
+    }
 
     mode = "lyrics";
 
+    lyricsModeButton.classList.remove("active");
     lyricsModeButton.classList.add("active");
+
     normalModeButton.classList.remove("active");
 
     updateSentences();
-
 });
 
-
-/* =========================
-   Text processing
-========================= */
-
-function normalizeText(text) {
-
-    return text
-        .replace(/\r\n/g, "\n")
-        .replace(/\r/g, "\n")
-        .trim();
-
-}
-
-
-function countWords(text) {
-
-    return text
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
-        .length;
-
-}
-
-
-/* Normal Mode */
-
-function splitNormalText(text) {
-
-    text = normalizeText(text);
-
-    if (!text) {
-        return [];
-    }
-
-    /*
-        Line breaks are treated as spaces.
-        Sentence endings:
-        .
-        !
-        ?
-        and their combinations.
-    */
-
-    text = text.replace(/\n+/g, " ");
-
-    const matches =
-        text.match(/.*?[.!?]+(?=\s|$)/g) || [];
-
-    let result = [];
-
-    let remainder = text;
-
-    for (const match of matches) {
-
-        const sentence = match.trim();
-
-        if (!sentence) {
-            continue;
-        }
-
-        result.push(sentence);
-
-        remainder =
-            remainder.slice(match.length).trim();
-
-    }
-
-    /*
-        Text without final punctuation
-    */
-
-    if (remainder) {
-
-        if (result.length > 0) {
-
-            result[result.length - 1] +=
-                " " + remainder;
-
-        } else {
-
-            result.push(remainder);
-
-        }
-
-    }
-
-    /*
-        Very short fragments such as:
-        "Nein."
-        "Ja."
-        are merged with the previous sentence.
-    */
-
-    const merged = [];
-
-    for (const sentence of result) {
-
-        if (
-            countWords(sentence) < 3 &&
-            merged.length > 0
-        ) {
-
-            merged[merged.length - 1] +=
-                " " + sentence;
-
-        } else {
-
-            merged.push(sentence);
-
-        }
-
-    }
-
-    return merged;
-}
-
-
-/* Lyrics Mode */
-
-function splitLyricsText(text) {
-
-    text = normalizeText(text);
-
-    if (!text) {
-        return [];
-    }
-
-    return text
-        .split("\n")
-        .map(line => {
-
-            /*
-                Remove everything inside parentheses.
-
-                Example:
-                Hola (yeah) amigo
-                →
-                Hola amigo
-            */
-
-            line = line.replace(/\([^)]*\)/g, "");
-
-            /*
-                Clean extra spaces
-            */
-
-            line = line
-                .replace(/\s+/g, " ")
-                .trim();
-
-            return line;
-
-        })
-        .filter(line => line.length > 0);
-
-}
-
-
-function updateSentences() {
-
-    stopSpeaking();
-
-    if (mode === "normal") {
-
-        sentences =
-            splitNormalText(textInput.value);
-
-    } else {
-
-        sentences =
-            splitLyricsText(textInput.value);
-
-    }
-
-    renderSentences();
-
+textInput.addEventListener("input", () => {
+    updateSentences();
+});
+
+languageSelect.addEventListener("change", () => {
+    loadVoices();
     saveData();
-
-}
-
-
-/* =========================
-   Render
-========================= */
-
-function renderSentences() {
-
-    sentenceList.innerHTML = "";
-
-    status.textContent =
-        sentences.length +
-        (sentences.length === 1
-            ? " sentence"
-            : " sentences");
-
-    if (sentences.length === 0) {
-
-        sentenceList.innerHTML =
-            '<div class="empty">No text entered.</div>';
-
-        return;
-    }
-
-    sentences.forEach((sentence, index) => {
-
-        const container =
-            document.createElement("div");
-
-        container.className = "sentence";
-
-        container.dataset.index = index;
-
-        const number =
-            document.createElement("div");
-
-        number.className = "sentence-number";
-
-        number.textContent =
-            (index + 1) + ".";
-
-        const text =
-            document.createElement("div");
-
-        text.className = "sentence-text";
-
-        text.textContent = sentence;
-
-        const button =
-            document.createElement("button");
-
-        button.textContent = "▶ Listen";
-
-        button.addEventListener("click", () => {
-
-            speakSentence(index);
-
-        });
-
-        container.appendChild(number);
-        container.appendChild(text);
-        container.appendChild(button);
-
-        sentenceList.appendChild(container);
-
-    });
-
-}
-
-
-/* =========================
-   Speech
-========================= */
-
-function getSelectedVoice() {
-
-    const selectedName =
-        voiceSelect.value;
-
-    if (!selectedName) {
-        return null;
-    }
-
-    return voices.find(
-        voice => voice.name === selectedName
-    ) || null;
-
-}
-
-
-function speakSentence(index) {
-
-    stopSpeaking();
-
-    if (!sentences[index]) {
-        return;
-    }
-
-    speakingIndex = index;
-
-    highlightSentence(index);
-
-    const utterance =
-        new SpeechSynthesisUtterance(
-            sentences[index]
-        );
-
-    utterance.lang =
-        languageSelect.value;
-
-    utterance.rate =
-        Number(rateSelect.value);
-
-    const voice =
-        getSelectedVoice();
-
-    if (voice) {
-        utterance.voice = voice;
-    }
-
-    utterance.onend = () => {
-
-        speakingIndex = -1;
-
-        highlightSentence(-1);
-
-    };
-
-    utterance.onerror = () => {
-
-        speakingIndex = -1;
-
-        highlightSentence(-1);
-
-    };
-
-    speechSynthesis.speak(utterance);
-
-}
-
-
-function readAll() {
-
-    stopSpeaking();
-
-    if (sentences.length === 0) {
-        return;
-    }
-
-    isReadingAll = true;
-
-    readNext(0);
-
-}
-
-
-function readNext(index) {
-
-    if (!isReadingAll) {
-        return;
-    }
-
-    if (index >= sentences.length) {
-
-        isReadingAll = false;
-
-        speakingIndex = -1;
-
-        highlightSentence(-1);
-
-        return;
-    }
-
-    speakingIndex = index;
-
-    highlightSentence(index);
-
-    const utterance =
-        new SpeechSynthesisUtterance(
-            sentences[index]
-        );
-
-    utterance.lang =
-        languageSelect.value;
-
-    utterance.rate =
-        Number(rateSelect.value);
-
-    const voice =
-        getSelectedVoice();
-
-    if (voice) {
-        utterance.voice = voice;
-    }
-
-    utterance.onend = () => {
-
-        if (isReadingAll) {
-
-            readNext(index + 1);
-
-        }
-
-    };
-
-    utterance.onerror = () => {
-
-        isReadingAll = false;
-
-        speakingIndex = -1;
-
-        highlightSentence(-1);
-
-    };
-
-    speechSynthesis.speak(utterance);
-
-}
-
-
-function pauseSpeaking() {
-
-    speechSynthesis.pause();
-
-}
-
-
-function resumeSpeaking() {
-
-    speechSynthesis.resume();
-
-}
-
-
-function stopSpeaking() {
-
-    isReadingAll = false;
-
-    speechSynthesis.cancel();
-
-    speakingIndex = -1;
-
-    highlightSentence(-1);
-
-}
-
-
-function highlightSentence(index) {
-
-    const all =
-        document.querySelectorAll(".sentence");
-
-    all.forEach((element, i) => {
-
-        if (i === index) {
-
-            element.classList.add("speaking");
-
-        } else {
-
-            element.classList.remove("speaking");
-
-        }
-
-    });
-
-}
-
-
-/* =========================
-   Voices
-========================= */
-
-function loadVoices() {
-
-    voices =
-        speechSynthesis.getVoices();
-
-    updateVoiceList();
-
-}
-
-
-function updateVoiceList() {
-
-    const language =
-        languageSelect.value;
-
-    voiceSelect.innerHTML = "";
-
-    const defaultOption =
-        document.createElement("option");
-
-    defaultOption.value = "";
-
-    defaultOption.textContent =
-        "Default";
-
-    voiceSelect.appendChild(
-        defaultOption
-    );
-
-
-    /*
-        Show voices matching the selected
-        language first.
-    */
-
-    const matching =
-        voices.filter(voice => {
-
-            return voice.lang
-                .toLowerCase()
-                .startsWith(
-                    language
-                        .split("-")[0]
-                        .toLowerCase()
-                );
-
-        });
-
-
-    const other =
-        voices.filter(voice => {
-
-            return !matching.includes(voice);
-
-        });
-
-
-    [...matching, ...other].forEach(voice => {
-
-        const option =
-            document.createElement("option");
-
-        option.value =
-            voice.name;
-
-        option.textContent =
-            voice.name +
-            " (" +
-            voice.lang +
-            ")";
-
-        voiceSelect.appendChild(option);
-
-    });
-
-
-    /*
-        Automatically choose a suitable
-        Latin American Spanish voice when
-        Spanish Latin America is selected.
-    */
-
-    if (language === "es-US") {
-
-        const preferred =
-            matching.find(voice => {
-
-                const name =
-                    voice.name.toLowerCase();
-
-                return (
-                    name.includes("mexico") ||
-                    name.includes("latin") ||
-                    name.includes("latino") ||
-                    voice.lang.toLowerCase() === "es-us"
-                );
-
-            });
-
-        if (preferred) {
-
-            voiceSelect.value =
-                preferred.name;
-
-        }
-
-    }
-
-}
-
-
-/* =========================
-   Events
-========================= */
-
-textInput.addEventListener(
-    "input",
-    updateSentences
-);
-
-
-languageSelect.addEventListener(
-    "change",
-    () => {
-
-        updateVoiceList();
-
-        saveData();
-
-    }
-);
-
-
-rateSelect.addEventListener(
-    "change",
-    saveData
-);
-
-
-voiceSelect.addEventListener(
-    "change",
-    saveData
-);
-
-
-readAllButton.addEventListener(
-    "click",
-    readAll
-);
-
-
-pauseButton.addEventListener(
-    "click",
-    pauseSpeaking
-);
-
-
-resumeButton.addEventListener(
-    "click",
-    resumeSpeaking
-);
-
-
-stopButton.addEventListener(
-    "click",
-    stopSpeaking
-);
-
-
-/* =========================
-   localStorage
-========================= */
-
-function saveData() {
-
-    const data = {
-
-        text: textInput.value,
-
-        mode: mode,
-
-        language:
-            languageSelect.value,
-
-        voice:
-            voiceSelect.value,
-
-        rate:
-            rateSelect.value
-
-    };
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(data)
-    );
-
-}
-
-
-function loadData() {
-
-    const saved =
-        localStorage.getItem(
-            STORAGE_KEY
-        );
-
-    if (!saved) {
-        return;
-    }
-
-    try {
-
-        const data =
-            JSON.parse(saved);
-
-        textInput.value =
-            data.text || "";
-
-        mode =
-            data.mode || "normal";
-
-        languageSelect.value =
-            data.language || "de-DE";
-
-        rateSelect.value =
-            data.rate || "1";
-
-        if (mode === "lyrics") {
-
-            lyricsModeButton.classList.add(
-                "active"
-            );
-
-            normalModeButton.classList.remove(
-                "active"
-            );
-
-        } else {
-
-            normalModeButton.classList.add(
-                "active"
-            );
-
-            lyricsModeButton.classList.remove(
-                "active"
-            );
-
-        }
-
-        updateSentences();
-
-        /*
-            Voice list may not have loaded yet,
-            so restore the voice afterward.
-        */
-
-        setTimeout(() => {
-
-            if (data.voice) {
-
-                voiceSelect.value =
-                    data.voice;
-
-            }
-
-        }, 500);
-
-    } catch (error) {
-
-        console.error(
-            "Could not load saved data.",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================
-   Initialize
-========================= */
-
-speechSynthesis.onvoiceschanged =
-    loadVoices;
+});
+
+speedSelect.addEventListener("change", () => {
+    saveData();
+});
+
+readAllButton.addEventListener("click", readAll);
+pauseButton.addEventListener("click", pauseReading);
+resumeButton.addEventListener("click", resumeReading);
+stopButton.addEventListener("click", stopReading);
+clearButton.addEventListener("click", clearSentences);
+
+speechSynthesis.onvoiceschanged = loadVoices;
 
 loadVoices();
-
 loadData();
-
 </script>
 
 </body>
