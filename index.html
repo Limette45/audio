@@ -321,6 +321,8 @@ let sentences = [];
 let currentSpeakingIndex = -1;
 let readingAll = false;
 let readAllIndex = 0;
+let individualReading = false;
+let individualRepeatCount = 0;
 
 function saveData() {
     localStorage.setItem(
@@ -422,6 +424,8 @@ function updateSentences() {
     currentSpeakingIndex = -1;
     readingAll = false;
     readAllIndex = 0;
+    individualReading = false;
+    individualRepeatCount = 0;
 
     if (mode === "normal") {
         sentences = splitNormalText(textInput.value);
@@ -461,7 +465,7 @@ function renderSentences() {
         button.className = "listen-button";
         button.textContent = "Listen";
         button.addEventListener("click", () => {
-            speakSentence(index);
+            speakSentenceTwice(index);
         });
 
         item.appendChild(text);
@@ -531,18 +535,8 @@ function getSelectedVoice() {
     return voices[Number(index)] || null;
 }
 
-function speakSentence(index) {
-    if (!sentences[index]) {
-        return;
-    }
-
-    readingAll = false;
-    speechSynthesis.cancel();
-
-    currentSpeakingIndex = index;
-    renderSentences();
-
-    const utterance = new SpeechSynthesisUtterance(sentences[index]);
+function createUtterance(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
 
     utterance.lang = languageSelect.value;
     utterance.rate = Number(speedSelect.value);
@@ -554,18 +548,53 @@ function speakSentence(index) {
         utterance.lang = voice.lang;
     }
 
+    return utterance;
+}
+
+function speakSentenceTwice(index) {
+    if (!sentences[index]) {
+        return;
+    }
+
+    speechSynthesis.cancel();
+
+    readingAll = false;
+    individualReading = true;
+    individualRepeatCount = 0;
+    currentSpeakingIndex = index;
+
+    renderSentences();
+
+    speakIndividualRepeat(index);
+}
+
+function speakIndividualRepeat(index) {
+    if (!individualReading) {
+        return;
+    }
+
+    if (individualRepeatCount >= 2) {
+        individualReading = false;
+        currentSpeakingIndex = -1;
+        renderSentences();
+        return;
+    }
+
+    const utterance = createUtterance(sentences[index]);
+
     utterance.onend = () => {
-        if (!readingAll) {
-            currentSpeakingIndex = -1;
-            renderSentences();
+        if (!individualReading) {
+            return;
         }
+
+        individualRepeatCount++;
+        speakIndividualRepeat(index);
     };
 
     utterance.onerror = () => {
-        if (!readingAll) {
-            currentSpeakingIndex = -1;
-            renderSentences();
-        }
+        individualReading = false;
+        currentSpeakingIndex = -1;
+        renderSentences();
     };
 
     speechSynthesis.speak(utterance);
@@ -585,17 +614,7 @@ function readNext() {
     currentSpeakingIndex = index;
     renderSentences();
 
-    const utterance = new SpeechSynthesisUtterance(sentences[index]);
-
-    utterance.lang = languageSelect.value;
-    utterance.rate = Number(speedSelect.value);
-
-    const voice = getSelectedVoice();
-
-    if (voice) {
-        utterance.voice = voice;
-        utterance.lang = voice.lang;
-    }
+    const utterance = createUtterance(sentences[index]);
 
     utterance.onend = () => {
         if (!readingAll) {
@@ -625,6 +644,7 @@ function readAll() {
 
     speechSynthesis.cancel();
 
+    individualReading = false;
     readingAll = true;
     readAllIndex = 0;
 
@@ -650,6 +670,7 @@ function resumeReading() {
 
 function stopReading() {
     readingAll = false;
+    individualReading = false;
     speechSynthesis.cancel();
 
     currentSpeakingIndex = -1;
@@ -662,7 +683,9 @@ function clearSentences() {
     speechSynthesis.cancel();
 
     readingAll = false;
+    individualReading = false;
     readAllIndex = 0;
+    individualRepeatCount = 0;
     currentSpeakingIndex = -1;
 
     textInput.value = "";
