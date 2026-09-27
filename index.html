@@ -26,6 +26,7 @@ body {
 h1 {
     margin: 0 0 25px;
     text-align: center;
+    font-size: 28px;
 }
 
 .mode-buttons {
@@ -34,16 +35,14 @@ h1 {
     margin-bottom: 20px;
 }
 
-.mode-buttons button {
-    flex: 1;
-}
-
 button,
 select {
+    min-height: 44px;
     padding: 10px 14px;
     border: 1px solid #ccc;
-    border-radius: 6px;
+    border-radius: 7px;
     background: white;
+    color: #222;
     font-size: 15px;
     cursor: pointer;
 }
@@ -52,9 +51,15 @@ button:hover {
     background: #eee;
 }
 
+.mode-buttons button {
+    flex: 1;
+    font-weight: 600;
+}
+
 .mode-buttons button.active {
     background: #333;
     color: white;
+    border-color: #333;
 }
 
 textarea {
@@ -77,14 +82,18 @@ textarea {
 }
 
 .controls select {
-    min-width: 180px;
+    flex: 1 1 180px;
+    min-width: 0;
+}
+
+.controls button {
+    flex: 1 1 auto;
 }
 
 .clear-button {
     margin-left: auto;
-    background: #fff;
-    border-color: #c44;
     color: #b22;
+    border-color: #c44;
 }
 
 .clear-button:hover {
@@ -122,12 +131,14 @@ textarea {
 
 .sentence-text {
     flex: 1;
+    min-width: 0;
     line-height: 1.5;
-    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 .listen-button {
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .empty {
@@ -143,13 +154,47 @@ textarea {
         padding: 20px 10px;
     }
 
-    .controls {
-        flex-direction: column;
+    h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
     }
 
-    .controls select,
+    .mode-buttons {
+        gap: 8px;
+    }
+
+    .mode-buttons button {
+        min-height: 48px;
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+
+    textarea {
+        min-height: 200px;
+        font-size: 16px;
+    }
+
+    .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .controls select {
+        width: 100%;
+        min-height: 48px;
+        font-size: 14px;
+    }
+
     .controls button {
         width: 100%;
+        min-height: 48px;
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+
+    .controls select:first-child {
+        grid-column: 1 / -1;
     }
 
     .clear-button {
@@ -157,7 +202,36 @@ textarea {
     }
 
     .sentence {
+        align-items: center;
+        padding: 12px;
+    }
+
+    .sentence-text {
+        font-size: 15px;
+    }
+
+    .listen-button {
+        min-height: 44px;
+        padding: 9px 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .controls select:first-child {
+        grid-column: auto;
+    }
+
+    .sentence {
         align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .listen-button {
+        width: 100%;
     }
 }
 </style>
@@ -207,9 +281,9 @@ textarea {
 
     <div class="controls">
         <button id="readAllButton">Read All</button>
-        <button id="pauseButton">Pause</button>
-        <button id="resumeButton">Resume</button>
-        <button id="stopButton">Stop</button>
+        <button id="pauseButton">⏸ Pause</button>
+        <button id="resumeButton">▶ Resume</button>
+        <button id="stopButton">⏹ Stop</button>
         <button id="clearButton" class="clear-button">Clear Sentences</button>
     </div>
 
@@ -411,9 +485,11 @@ function loadVoices() {
     voiceSelect.appendChild(defaultOption);
 
     const matchingVoices = voices
-        .filter(voice => voice.lang.toLowerCase().startsWith(
-            selectedLanguage.toLowerCase().split("-")[0]
-        ))
+        .filter(voice =>
+            voice.lang.toLowerCase().startsWith(
+                selectedLanguage.toLowerCase().split("-")[0]
+            )
+        )
         .sort((a, b) => {
             if (selectedLanguage === "es-US") {
                 const aPreferred =
@@ -437,7 +513,9 @@ function loadVoices() {
 
     if (
         previousVoice &&
-        [...voiceSelect.options].some(option => option.value === previousVoice)
+        [...voiceSelect.options].some(
+            option => option.value === previousVoice
+        )
     ) {
         voiceSelect.value = previousVoice;
     }
@@ -618,9 +696,7 @@ lyricsModeButton.addEventListener("click", () => {
 
     mode = "lyrics";
 
-    lyricsModeButton.classList.remove("active");
     lyricsModeButton.classList.add("active");
-
     normalModeButton.classList.remove("active");
 
     updateSentences();
