@@ -146,6 +146,7 @@ textarea {
     min-width: 0;
     line-height: 1.5;
     overflow-wrap: anywhere;
+    cursor: pointer;
 }
 
 .listen-button {
@@ -274,8 +275,7 @@ textarea {
             <option value="en-US">English (US)</option>
             <option value="en-GB">English (UK)</option>
             <option value="fr-FR">French</option>
-            <option value="it-IT">Italian</option>
-            <option value="pt-BR">Portuguese (Brazil)</option>
+            <option value="sv-SE">Swedish</option>
         </select>
 
         <select id="voiceSelect">
@@ -491,12 +491,15 @@ function renderSentences() {
         const text = document.createElement("div");
         text.className = "sentence-text";
         text.textContent = sentence;
+        text.addEventListener("click", () => {
+            speakSentence(index);
+        });
 
         const button = document.createElement("button");
         button.className = "listen-button";
-        button.textContent = "Listen";
+        button.textContent = "➡️";
         button.addEventListener("click", () => {
-            speakSentence(index);
+            readFromSentence(index);
         });
 
         item.appendChild(text);
@@ -651,6 +654,21 @@ function readNext() {
     };
 
     speechSynthesis.speak(utterance);
+}
+
+function readFromSentence(index) {
+    if (!sentences[index]) {
+        return;
+    }
+
+    speechSynthesis.cancel();
+
+    individualReading = false;
+    readingAll = true;
+    readAllIndex = index;
+
+    status.textContent = "Reading all sentences...";
+    readNext();
 }
 
 function readAll() {
