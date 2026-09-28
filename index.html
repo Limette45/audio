@@ -335,7 +335,7 @@ textarea {
 
     <div class="controls">
         <button id="readAllButton">🔊Read All</button>
-        <button id="pauseButton">⏸️Pause</button>     
+        <button id="pauseButton">⏸️Pause</button>
         <button id="clearButton" class="clear-button">Clear Sentences</button>
     </div>
 
@@ -361,8 +361,6 @@ const lyricsModeButton = document.getElementById("lyricsModeButton");
 
 const readAllButton = document.getElementById("readAllButton");
 const pauseButton = document.getElementById("pauseButton");
-const resumeButton = document.getElementById("resumeButton");
-const stopButton = document.getElementById("stopButton");
 const clearButton = document.getElementById("clearButton");
 
 const status = document.getElementById("status");
@@ -774,26 +772,6 @@ function pauseReading() {
         speechSynthesis.pause();
         status.textContent = "Paused";
     }
-}
-
-function resumeReading() {
-    if (speechSynthesis.paused) {
-        speechSynthesis.resume();
-        status.textContent = readingAll
-            ? "Reading all sentences..."
-            : "Reading";
-    }
-}
-
-function stopReading() {
-    readingAll = false;
-    individualReading = false;
-    speechSynthesis.cancel();
-
-    currentSpeakingIndex = -1;
-    renderSentences();
-
-    status.textContent = "Stopped";
 }
 
 function clearSentences() {
