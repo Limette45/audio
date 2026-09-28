@@ -29,6 +29,23 @@ h1 {
     font-size: 28px;
 }
 
+.page-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.page-buttons button {
+    flex: 1;
+    font-weight: 600;
+}
+
+.page-buttons button.active {
+    background: #333;
+    color: white;
+    border-color: #333;
+}
+
 .mode-buttons {
     display: flex;
     gap: 10px;
@@ -173,6 +190,16 @@ textarea {
         margin-bottom: 20px;
     }
 
+    .page-buttons {
+        gap: 6px;
+    }
+
+    .page-buttons button {
+        min-height: 48px;
+        padding: 10px 6px;
+        font-size: 13px;
+    }
+
     .mode-buttons {
         gap: 8px;
     }
@@ -237,6 +264,11 @@ textarea {
 }
 
 @media (max-width: 380px) {
+    .page-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
     .settings-controls {
         grid-template-columns: 1fr;
     }
@@ -256,7 +288,14 @@ textarea {
 <body>
 <div class="app">
 
-    <h1>🔊Voice Study Tool</h1>
+    <h1>Voice Study Tool</h1>
+
+    <div class="page-buttons">
+        <button id="page1Button" class="active">Page 1</button>
+        <button id="page2Button">Page 2</button>
+        <button id="page3Button">Page 3</button>
+        <button id="page4Button">Page 4</button>
+    </div>
 
     <div class="mode-buttons">
         <button id="normalModeButton" class="active">Normal Mode</button>
@@ -295,10 +334,10 @@ textarea {
     </div>
 
     <div class="controls">
-        <button id="readAllButton">🔊Read All</button>
-        <button id="pauseButton">⏸ Pause</button>
-        <button id="resumeButton">▶ Resume</button>
-        <button id="stopButton">⏹ Stop</button>
+        <button id="readAllButton">Read All</button>
+        <button id="pauseButton">Pause</button>
+        <button id="resumeButton">Resume</button>
+        <button id="stopButton">Stop</button>
         <button id="clearButton" class="clear-button">Clear Sentences</button>
     </div>
 
@@ -311,7 +350,8 @@ textarea {
 </div>
 
 <script>
-const STORAGE_KEY = "ttsStudyToolData";
+const PAGE_COUNT = 4;
+const STORAGE_PREFIX = "ttsStudyToolPage";
 
 const textInput = document.getElementById("textInput");
 const languageSelect = document.getElementById("languageSelect");
@@ -330,6 +370,14 @@ const clearButton = document.getElementById("clearButton");
 const status = document.getElementById("status");
 const sentencesContainer = document.getElementById("sentences");
 
+const pageButtons = [
+    document.getElementById("page1Button"),
+    document.getElementById("page2Button"),
+    document.getElementById("page3Button"),
+    document.getElementById("page4Button")
+];
+
+let currentPage = 1;
 let mode = "normal";
 let voices = [];
 let sentences = [];
@@ -338,9 +386,13 @@ let readingAll = false;
 let readAllIndex = 0;
 let individualReading = false;
 
+function getStorageKey(page) {
+    return `${STORAGE_PREFIX}${page}`;
+}
+
 function saveData() {
     localStorage.setItem(
-        STORAGE_KEY,
+        getStorageKey(currentPage),
         JSON.stringify({
             text: textInput.value,
             language: languageSelect.value,
@@ -350,37 +402,69 @@ function saveData() {
     );
 }
 
-function loadData() {
-    const saved = localStorage.getItem(STORAGE_KEY);
+function loadPageData(page) {
+    const saved = localStorage.getItem(getStorageKey(page));
 
-    if (!saved) {
-        updateSentences();
+    mode = "normal";
+    textInput.value = "";
+    languageSelect.value = "de-DE";
+    speedSelect.value = "1";
+
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+
+            textInput.value = data.text || "";
+
+            if (data.language) {
+                languageSelect.value = data.language;
+            }
+
+            if (data.speed) {
+                speedSelect.value = data.speed;
+            }
+
+            if (data.mode === "lyrics") {
+                mode = "lyrics";
+            }
+        } catch {
+            mode = "normal";
+        }
+    }
+
+    updateModeButtons();
+    updateSentences();
+}
+
+function switchPage(page) {
+    if (page === currentPage) {
         return;
     }
 
-    try {
-        const data = JSON.parse(saved);
+    speechSynthesis.cancel();
 
-        textInput.value = data.text || "";
+    readingAll = false;
+    individualReading = false;
+    readAllIndex = 0;
+    currentSpeakingIndex = -1;
 
-        if (data.language) {
-            languageSelect.value = data.language;
-        }
+    saveData();
 
-        if (data.speed) {
-            speedSelect.value = data.speed;
-        }
+    currentPage = page;
 
-        if (data.mode === "lyrics") {
-            mode = "lyrics";
-            normalModeButton.classList.remove("active");
-            lyricsModeButton.classList.add("active");
-        }
+    pageButtons.forEach((button, index) => {
+        button.classList.toggle("active", index + 1 === currentPage);
+    });
 
-        updateSentences();
-    } catch {
-        updateSentences();
-    }
+    status.textContent = "";
+
+    loadPageData(currentPage);
+    loadVoices();
+}
+
+function updateModeButtons() {
+    normalModeButton.classList.toggle("active", mode === "normal");
+    lyricsModeButton.classList.toggle("active", mode === "lyrics");
 }
 
 function splitNormalText(text) {
@@ -725,7 +809,7 @@ function clearSentences() {
     textInput.value = "";
     sentences = [];
 
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(getStorageKey(currentPage));
 
     renderSentences();
 
@@ -733,16 +817,19 @@ function clearSentences() {
     textInput.focus();
 }
 
+pageButtons.forEach((button, index) => {
+    button.addEventListener("click", () => {
+        switchPage(index + 1);
+    });
+});
+
 normalModeButton.addEventListener("click", () => {
     if (mode === "normal") {
         return;
     }
 
     mode = "normal";
-
-    normalModeButton.classList.add("active");
-    lyricsModeButton.classList.remove("active");
-
+    updateModeButtons();
     updateSentences();
 });
 
@@ -752,10 +839,7 @@ lyricsModeButton.addEventListener("click", () => {
     }
 
     mode = "lyrics";
-
-    lyricsModeButton.classList.add("active");
-    normalModeButton.classList.remove("active");
-
+    updateModeButtons();
     updateSentences();
 });
 
@@ -781,8 +865,4 @@ clearButton.addEventListener("click", clearSentences);
 speechSynthesis.onvoiceschanged = loadVoices;
 
 loadVoices();
-loadData();
-</script>
-
-</body>
-</html>
+loadPageData(currentPage);
