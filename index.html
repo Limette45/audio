@@ -573,7 +573,16 @@ function renderSentences() {
         text.className = "sentence-text";
         text.textContent = sentence;
         text.addEventListener("click", () => {
-            speakSentence(index);
+            if (index === currentSpeakingIndex) {
+                speechSynthesis.cancel();
+                readingAll = false;
+                individualReading = false;
+                currentSpeakingIndex = -1;
+                status.textContent = "";
+                renderSentences();
+            } else {
+                speakSentence(index);
+            }
         });
 
         const button = document.createElement("button");
