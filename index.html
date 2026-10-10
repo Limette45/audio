@@ -799,6 +799,10 @@ function pauseReading() {
 }
 
 function clearSentences() {
+    if (!confirm("Are you sure you want to clear all sentences on this page? This cannot be undone.")) {
+        return;
+    }
+
     speechSynthesis.cancel();
 
     readingAll = false;
