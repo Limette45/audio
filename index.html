@@ -350,6 +350,7 @@ textarea {
 <script>
 const PAGE_COUNT = 4;
 const STORAGE_PREFIX = "ttsStudyToolPage";
+const CURRENT_PAGE_KEY = "ttsStudyToolCurrentPage";
 
 const textInput = document.getElementById("textInput");
 const languageSelect = document.getElementById("languageSelect");
@@ -373,7 +374,12 @@ const pageButtons = [
     document.getElementById("page4Button")
 ];
 
-let currentPage = 1;
+let currentPage = Number(localStorage.getItem(CURRENT_PAGE_KEY)) || 1;
+
+if (currentPage < 1 || currentPage > PAGE_COUNT) {
+    currentPage = 1;
+}
+
 let mode = "normal";
 let voices = [];
 let sentences = [];
@@ -447,6 +453,7 @@ function switchPage(page) {
     saveData();
 
     currentPage = page;
+    localStorage.setItem(CURRENT_PAGE_KEY, currentPage);
 
     pageButtons.forEach((button, index) => {
         button.classList.toggle("active", index + 1 === currentPage);
@@ -811,6 +818,8 @@ function clearSentences() {
 }
 
 pageButtons.forEach((button, index) => {
+    button.classList.toggle("active", index + 1 === currentPage);
+
     button.addEventListener("click", () => {
         switchPage(index + 1);
     });
