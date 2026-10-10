@@ -530,6 +530,18 @@ function updateSentences() {
     saveData();
 }
 
+function stopReading() {
+    speechSynthesis.cancel();
+
+    readingAll = false;
+    individualReading = false;
+    readAllIndex = 0;
+    currentSpeakingIndex = -1;
+    status.textContent = "";
+
+    renderSentences();
+}
+
 function scrollToSpeakingSentence() {
     if (currentSpeakingIndex < 0) {
         return;
@@ -572,14 +584,10 @@ function renderSentences() {
         const text = document.createElement("div");
         text.className = "sentence-text";
         text.textContent = sentence;
+
         text.addEventListener("click", () => {
-            if (index === currentSpeakingIndex) {
-                speechSynthesis.cancel();
-                readingAll = false;
-                individualReading = false;
-                currentSpeakingIndex = -1;
-                status.textContent = "";
-                renderSentences();
+            if (readingAll || individualReading || speechSynthesis.speaking) {
+                stopReading();
             } else {
                 readFromSentence(index);
             }
@@ -849,7 +857,6 @@ speechSynthesis.onvoiceschanged = loadVoices;
 
 loadVoices();
 loadPageData(currentPage);
-
 </script>
 
 </body>
